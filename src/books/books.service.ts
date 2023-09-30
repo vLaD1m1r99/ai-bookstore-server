@@ -165,4 +165,27 @@ export class BooksService {
 
     return await this.userRepo.save(user);
   }
+
+  async removeBookFromUser(userId: string, bookId: string): Promise<User> {
+    const user = await this.userRepo.findOne({
+      relations: ['books'],
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User not found!`);
+    }
+
+    const book = user.books.find((b) => b.id === bookId);
+
+    if (!book) {
+      throw new NotFoundException(
+        `Book not found or not associated with the user!`,
+      );
+    }
+
+    user.books = user.books.filter((b) => b.id !== bookId);
+
+    return this.userRepo.save(user);
+  }
 }
