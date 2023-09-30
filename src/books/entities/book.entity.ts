@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Rating } from '../../ratings/entities/rating.entity';
 import { Comment } from '../../comments/entities/comment.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export type BookGenres = (
   | 'horror'
@@ -31,7 +33,7 @@ export class Book {
   @Column('simple-array', { default: [], array: true })
   genre: BookGenres;
 
-  @OneToMany(() => Rating, (rating) => rating.book)
+  @OneToMany(() => Rating, (rating) => rating.book, { cascade: true })
   ratings: Rating[];
 
   // Add a getter method for averageRating
@@ -56,8 +58,11 @@ export class Book {
   @Column({ nullable: true })
   audio: string;
 
-  @OneToMany(() => Comment, (comment) => comment.book)
+  @OneToMany(() => Comment, (comment) => comment.book, { cascade: true })
   comments: Comment[];
+
+  @ManyToMany(() => User, (user) => user.books)
+  users: User[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

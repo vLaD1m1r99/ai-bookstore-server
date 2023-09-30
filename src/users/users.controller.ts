@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Book } from 'src/books/entities/book.entity';
 
 @Controller('users')
 export class UsersController {
@@ -50,5 +51,26 @@ export class UsersController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.usersService.remove(id);
+  }
+
+  @Get(':id/books')
+  async getAllBooks(@Param('id') id: string): Promise<Book[]> {
+    return await this.usersService.getAllBooks(id);
+  }
+
+  @Post(':userId/books/:bookId')
+  async addBookToUser(
+    @Param('userId') userId: string,
+    @Param('bookId') bookId: string,
+  ): Promise<User> {
+    return await this.usersService.addBookToUser(userId, bookId);
+  }
+
+  @Delete(':userId/books/:bookId')
+  async removeBookFromUser(
+    @Param('userId') userId: string,
+    @Param('bookId') bookId: string,
+  ): Promise<User> {
+    return await this.usersService.removeBookFromUser(userId, bookId);
   }
 }

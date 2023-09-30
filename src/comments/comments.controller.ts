@@ -34,8 +34,4 @@ export class CommentsController {
   remove(@Param('id') id: string) {
     return this.commentsService.remove(id);
   }
-  @Get(':bookId')
-  findAllByBook(@Param('bookId') bookId: string) {
-    return this.commentsService.findAllByBook(bookId);
-  }
 }

@@ -11,7 +11,6 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { User } from 'src/users/entities/user.entity';
 
 @Controller('books')
 export class BooksController {
@@ -24,11 +23,6 @@ export class BooksController {
     createBookDto: CreateBookDto,
   ) {
     return this.booksService.create(userId, createBookDto);
-  }
-
-  @Get()
-  findAllByUser(@Param('userId') userId: string) {
-    return this.booksService.findAllByUser(userId);
   }
 
   @Get(':id')
@@ -54,11 +48,8 @@ export class BooksController {
     return this.booksService.remove(id);
   }
 
-  @Post('add-to-user/:userId/:bookId')
-  async addBookToUser(
-    @Param('userId') userId: string,
-    @Param('bookId') bookId: string,
-  ): Promise<User> {
-    return await this.booksService.addBookToUser(userId, bookId);
+  @Get('/comments/:id')
+  findAllByBook(@Param('id') id: string) {
+    return this.booksService.findAllComments(id);
   }
 }

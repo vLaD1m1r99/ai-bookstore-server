@@ -41,10 +41,10 @@ export class User {
   @Column({ nullable: true })
   picture: string;
 
-  @OneToMany(() => Rating, (rating) => rating.user)
+  @OneToMany(() => Rating, (rating) => rating.user, { cascade: true })
   ratings: Rating[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
   comments: Comment[];
 
   @ManyToMany(() => Book)
