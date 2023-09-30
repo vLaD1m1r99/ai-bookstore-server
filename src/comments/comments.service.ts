@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { Comment } from './entities/comment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CommentsService {
-  create(createCommentDto: CreateCommentDto) {
-    return 'This action adds a new comment';
+  constructor(
+    @InjectRepository(Comment)
+    private readonly commentRepo: Repository<Comment>,
+  ) {}
+
+  async create(createCommentDto: CreateCommentDto): Promise<Comment> {
+    const comment = this.commentRepo.create(createCommentDto);
+    return await this.commentRepo.save(comment);
   }
 
-  findAll() {
-    return `This action returns all comments`;
+  async findOne(id: string): Promise<Comment | null> {
+    const comment = await this.commentRepo.findOne({ where: { id } });
+    if (!comment) {
+      throw new NotFoundException(`Comment not found!`);
+    }
+    return comment;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
+  async update(
+    id: string,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<Comment> {
+    const comment = await this.commentRepo.findOne({ where: { id } });
+    if (!comment) {
+      throw new NotFoundException(`Comment not found!`);
+    }
+
+    if (updateCommentDto.text) {
+      comment.text = updateCommentDto.text;
+    }
+
+    return await this.commentRepo.save(comment);
   }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+  async remove(id: string): Promise<Comment> {
+    const comment = await this.commentRepo.findOne({ where: { id } });
+    if (!comment) {
+      throw new NotFoundException(`Comment not found!`);
+    }
+    return await this.commentRepo.remove(comment);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async findAllByBook(bookId: string): Promise<Comment[]> {
+    return await this.commentRepo.find({ where: { book: bookId } });
   }
 }

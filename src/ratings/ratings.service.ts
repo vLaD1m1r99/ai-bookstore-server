@@ -47,18 +47,48 @@ export class RatingsService {
       throw new NotFoundException(`Rating not found!`);
     }
 
-    if (updateRatingDto.value) {
-      rating.value = updateRatingDto.value;
+    const updatedRating = await this.ratingRepo.save(updateRatingDto);
+
+    const book = await this.bookRepo.findOne({
+      relations: ['ratings'],
+      where: { id: rating.book },
+    });
+
+    if (!book) {
+      throw new NotFoundException(`Book not found!`);
     }
 
-    return this.ratingRepo.save(rating);
+    const index = book.ratings.findIndex((r) => r.id === id);
+
+    if (index !== -1) {
+      book.ratings[index] = updatedRating;
+      await this.bookRepo.save(book);
+    }
+
+    return updatedRating;
   }
 
   async remove(id: string): Promise<Rating> {
     const rating = await this.ratingRepo.findOne({ where: { id } });
+
     if (!rating) {
       throw new NotFoundException(`Rating not found!`);
     }
+
+    const book = await this.bookRepo.findOne({
+      relations: ['ratings'],
+      where: { id: rating.book },
+    });
+
+    if (!book) {
+      throw new NotFoundException(`Book not found!`);
+    }
+
+    const updatedRatings = book.ratings.filter((r) => r.id !== id);
+    book.ratings = updatedRatings;
+
+    await this.bookRepo.save(book);
+
     return await this.ratingRepo.remove(rating);
   }
 

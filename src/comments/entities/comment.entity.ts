@@ -19,12 +19,12 @@ export class Comment {
   text: string;
 
   @ManyToOne(() => User, (user) => user.comments, { nullable: false })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user' })
   user: User;
 
   @ManyToOne(() => Book, (book) => book.comments, { nullable: false })
-  @JoinColumn({ name: 'book_id' })
-  book: Book;
+  @JoinColumn({ name: 'bookId' })
+  book: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

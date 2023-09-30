@@ -5,7 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-
+import { RatingsService } from 'src/ratings/ratings.service';
+import { CommentsService } from 'src/comments/comments.service';
 @Injectable()
 export class BooksService {
   constructor(
@@ -13,6 +14,8 @@ export class BooksService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Book)
     private readonly bookRepo: Repository<Book>,
+    private readonly ratingService: RatingsService,
+    private readonly commentService: CommentsService,
   ) {}
 
   async findAllByUser(userId: string): Promise<Book[]> {
@@ -88,11 +91,57 @@ export class BooksService {
       bookToUpdate.audio = updateBookDto.audio;
     }
 
-    return await this.bookRepo.save(bookToUpdate);
+    await this.bookRepo.save(bookToUpdate);
+
+    // Find all users who have this book associated with them
+    const usersToUpdateBook = await this.userRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.books', 'book')
+      .where('book.id = :bookId', { bookId })
+      .getMany();
+
+    // Update the book in the user's books array for each user
+    for (const userToUpdate of usersToUpdateBook) {
+      const bookToUpdateIndex = userToUpdate.books.findIndex(
+        (book) => book.id === bookId,
+      );
+
+      if (bookToUpdateIndex === -1) {
+        throw new NotFoundException(
+          `Book not found or does not belong to the user!`,
+        );
+      } else {
+        userToUpdate.books[bookToUpdateIndex] = bookToUpdate;
+        await this.userRepo.save(userToUpdate);
+      }
+    }
+    return bookToUpdate;
   }
 
   async remove(id: string): Promise<Book> {
     const book = await this.findOne(id);
+    // Find all users who have this book associated with them
+    const usersToUpdateBook = await this.userRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.books', 'book')
+      .where('book.id = :bookId', { id })
+      .getMany();
+
+    // Update the book in the user's books array for each user
+    for (const userToUpdate of usersToUpdateBook) {
+      const updatedBooks = userToUpdate.books.filter((r) => r.id !== id);
+      userToUpdate.books = updatedBooks;
+      await this.userRepo.save(userToUpdate);
+    }
+    // Delete all associated ratings for the book
+    for (const rating of book.ratings) {
+      await this.ratingService.remove(rating.id);
+    }
+
+    // Delete all associated comments for the book
+    for (const comment of book.comments) {
+      await this.commentService.remove(comment.id);
+    }
     return await this.bookRepo.remove(book);
   }
 
