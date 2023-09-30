@@ -38,7 +38,7 @@ export class User {
   @Column({ nullable: false, length: 20 })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   picture: string;
 
   @OneToMany(() => Rating, (rating) => rating.user)
