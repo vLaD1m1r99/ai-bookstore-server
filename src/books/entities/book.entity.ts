@@ -44,16 +44,16 @@ export class Book {
     return sum / this.ratings.length;
   }
 
-  @Column()
+  @Column({ nullable: true })
   author: string;
 
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   @Column({ unique: true, nullable: false, length: 50 })
   pdf: string;
 
-  @Column()
+  @Column({ nullable: true })
   audio: string;
 
   @OneToMany(() => Comment, (comment) => comment.book)

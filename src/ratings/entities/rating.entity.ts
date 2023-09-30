@@ -23,11 +23,11 @@ export class Rating {
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: string;
 
   @ManyToOne(() => Book, { nullable: false })
   @JoinColumn({ name: 'bookId' })
-  book: Book;
+  book: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
