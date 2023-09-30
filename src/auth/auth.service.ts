@@ -16,18 +16,14 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findByEmail(email);
-
     if (user && (await bcrypt.compare(password, user.password))) {
-      // Passwords match
       return user;
     }
-    // User not found or password is incorrect
     return null;
   }
 
   async login(credentials: Partial<User>): Promise<{ access_token: string }> {
     // Customize the payload as needed
-    console.log(credentials);
     const user = await this.validateUser(
       credentials.email,
       credentials.password,
