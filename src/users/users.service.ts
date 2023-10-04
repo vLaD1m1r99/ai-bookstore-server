@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from 'src/books/entities/book.entity';
+import { join } from 'path';
 @Injectable()
 export class UsersService {
   constructor(
@@ -16,9 +17,20 @@ export class UsersService {
     @InjectRepository(Book) private readonly bookRepo: Repository<Book>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepo.create(createUserDto);
-    return await this.userRepo.save(user);
+  async create(
+    createUserDto: CreateUserDto,
+    pictureFile: Express.Multer.File,
+  ): Promise<User> {
+    console.log(pictureFile);
+    const { email, password, name } = createUserDto;
+    const user = this.userRepo.create({
+      email,
+      password,
+      name,
+      picture: pictureFile ? pictureFile.originalname : null,
+    });
+    const createdUser = await this.userRepo.save(user);
+    return createdUser;
   }
 
   async findAll(): Promise<User[]> {
@@ -31,6 +43,17 @@ export class UsersService {
       throw new NotFoundException(`User not found!`);
     }
     return user;
+  }
+
+  async findPicture(id: string, res): Promise<void> {
+    const user = await this.findOne(id);
+    if (user.picture) {
+      return res.sendFile(
+        join(process.cwd(), `uploads/profileImages/${user.picture}`),
+      );
+    } else {
+      return null;
+    }
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -49,10 +72,6 @@ export class UsersService {
 
     if (updateUserDto.name) {
       user.name = updateUserDto.name;
-    }
-
-    if (updateUserDto.picture) {
-      user.picture = updateUserDto.picture;
     }
 
     return await this.userRepo.save(user);

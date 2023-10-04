@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,14 +17,29 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Book } from 'src/books/entities/book.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return await this.usersService.create(createUserDto);
+  @UseInterceptors(
+    FileInterceptor('picture', {
+      storage: diskStorage({
+        destination: './uploads/profileImages',
+        filename: (req, file, cb) => {
+          cb(null, `${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() picture: Express.Multer.File,
+  ): Promise<User> {
+    return await this.usersService.create(createUserDto, picture);
   }
 
   @Get()
@@ -56,6 +74,11 @@ export class UsersController {
   @Get(':id/books')
   async getAllBooks(@Param('id') id: string): Promise<Book[]> {
     return await this.usersService.getAllBooks(id);
+  }
+
+  @Get(':id/picture')
+  async getProfilePicture(@Param('id') id: string, @Res() res): Promise<void> {
+    return await this.usersService.findPicture(id, res);
   }
 
   @Post(':userId/books/:bookId')

@@ -8,7 +8,6 @@ import { RatingsModule } from './ratings/ratings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import config from 'ormconfig';
 import { AuthModule } from './auth/auth.module';
-
 @Module({
   imports: [
     UsersModule,
