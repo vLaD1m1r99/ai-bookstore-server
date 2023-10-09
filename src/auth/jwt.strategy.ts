@@ -9,12 +9,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_AUTH_TOKEN,
+      secretOrKey:
+        '00c47539d9d503c020b88625ca0bd8272402cff50be0246e2c28f53da4d03666',
     });
   }
 
   async validate(payload: any): Promise<User> {
-    const user = await this.authService.validateUserById(payload.sub);
+    const user = await this.authService.validateUserById(payload.id);
 
     if (!user) {
       throw new UnauthorizedException('Invalid token');

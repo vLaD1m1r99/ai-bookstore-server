@@ -6,7 +6,7 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 
 const config: PostgresConnectionOptions = {
   type: 'postgres',
-  database: 'ai-bookstore',
+  database: 'ai_bookstore',
   host: 'localhost',
   port: 5432,
   username: 'vlada',

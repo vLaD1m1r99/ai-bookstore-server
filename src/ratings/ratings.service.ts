@@ -4,16 +4,34 @@ import { Repository } from 'typeorm';
 import { Rating } from './entities/rating.entity';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
+import { User } from 'src/users/entities/user.entity';
+import { Book } from 'src/books/entities/book.entity';
 @Injectable()
 export class RatingsService {
   constructor(
     @InjectRepository(Rating)
     private readonly ratingRepo: Repository<Rating>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(Book)
+    private readonly bookRepo: Repository<Book>,
   ) {}
 
-  async create(createRatingDto: CreateRatingDto): Promise<Rating> {
-    const rating = this.ratingRepo.create(createRatingDto);
-    return await this.ratingRepo.save(rating);
+  async create(createRatingDto: CreateRatingDto): Promise<Rating | null> {
+    const user = await this.userRepo.findOne({
+      where: { id: createRatingDto.user },
+    });
+    const book = await this.bookRepo.findOne({
+      where: { id: createRatingDto.book },
+    });
+    if (user && book) {
+      const rating = this.ratingRepo.create({
+        ...createRatingDto,
+        user: user,
+        book: book,
+      });
+      return await this.ratingRepo.save(rating);
+    } else return null;
   }
 
   async findOne(id: string): Promise<Rating> {
@@ -29,7 +47,8 @@ export class RatingsService {
     if (!rating) {
       throw new NotFoundException(`Rating not found!`);
     }
-    return await this.ratingRepo.save(updateRatingDto);
+    const ratingToUpdate = { ...rating, value: updateRatingDto.value };
+    return await this.ratingRepo.save(ratingToUpdate);
   }
 
   async remove(id: string): Promise<Rating> {
@@ -44,15 +63,13 @@ export class RatingsService {
   async findRatingByUserIdAndBookId(
     userId: string,
     bookId: string,
-  ): Promise<Rating | null> {
+  ): Promise<Rating> {
     const rating = await this.ratingRepo.findOne({
-      where: { user: userId, book: bookId },
+      where: { user: { id: userId }, book: { id: bookId } },
     });
-
     if (!rating) {
       throw new NotFoundException(`Rating not found!`);
     }
-
     return rating;
   }
 }

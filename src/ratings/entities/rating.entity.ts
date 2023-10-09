@@ -18,16 +18,16 @@ export class Rating {
 
   @Column({ type: 'int', nullable: false })
   @Min(1)
-  @Max(10)
+  @Max(5)
   value: number;
 
   @ManyToOne(() => User, { nullable: false })
-  @JoinColumn({ name: 'userId' })
-  user: string;
+  @JoinColumn()
+  user: User;
 
   @ManyToOne(() => Book, { nullable: false })
-  @JoinColumn({ name: 'bookId' })
-  book: string;
+  @JoinColumn()
+  book: Book;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

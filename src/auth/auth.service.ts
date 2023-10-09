@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -23,18 +24,34 @@ export class AuthService {
   }
 
   async login(credentials: Partial<User>): Promise<{ access_token: string }> {
-    // Customize the payload as needed
     const user = await this.validateUser(
       credentials.email,
       credentials.password,
     );
     if (user) {
-      const payload = { sub: user.id, email: user.email };
+      const payload = { ...user };
       return {
         access_token: this.jwtService.sign(payload),
       };
     } else {
       throw new UnauthorizedException('Invalid credentials');
+    }
+  }
+  async register(
+    createUserDto: CreateUserDto,
+    pictureFile: Express.Multer.File,
+  ): Promise<{ access_token: string }> {
+    const createdUser = await this.userService.create(
+      createUserDto,
+      pictureFile,
+    );
+    if (createdUser) {
+      const payload = { ...createdUser };
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
+    } else {
+      throw new UnauthorizedException('Invalid data');
     }
   }
 }

@@ -2,12 +2,12 @@ import { IsInt, Min, Max, IsUUID } from 'class-validator';
 export class CreateRatingDto {
   @IsInt()
   @Min(1)
-  @Max(10)
+  @Max(5)
   value: number;
 
   @IsUUID()
-  userId: string;
+  user: string;
 
   @IsUUID()
-  bookId: string;
+  book: string;
 }

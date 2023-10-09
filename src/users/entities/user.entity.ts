@@ -5,9 +5,9 @@ import {
   OneToMany,
   BeforeInsert,
   ManyToMany,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinTable,
 } from 'typeorm';
 import { Rating } from '../../ratings/entities/rating.entity';
 import * as bcrypt from 'bcrypt';
@@ -20,7 +20,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ nullable: false })
   @IsEmail()
   email: string;
 
@@ -47,7 +47,7 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
   comments: Comment[];
 
-  @ManyToMany(() => Book)
+  @ManyToMany(() => Book, (book) => book.users)
   @JoinTable()
   books: Book[];
 

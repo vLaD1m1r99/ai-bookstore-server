@@ -1,5 +1,7 @@
 import {
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,16 +23,20 @@ export class UsersService {
     createUserDto: CreateUserDto,
     pictureFile: Express.Multer.File,
   ): Promise<User> {
-    console.log(pictureFile);
     const { email, password, name } = createUserDto;
+    if (!email || !password || !name) {
+      throw new HttpException(
+        'Email, password, and name are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const user = this.userRepo.create({
       email,
       password,
       name,
       picture: pictureFile ? pictureFile.originalname : null,
     });
-    const createdUser = await this.userRepo.save(user);
-    return createdUser;
+    return await this.userRepo.save(user);
   }
 
   async findAll(): Promise<User[]> {
@@ -46,7 +52,7 @@ export class UsersService {
   }
 
   async findPicture(id: string, res): Promise<void> {
-    const user = await this.findOne(id);
+    const user = await this.userRepo.findOne({ where: { id } });
     if (user.picture) {
       return res.sendFile(
         join(process.cwd(), `uploads/profileImages/${user.picture}`),
@@ -121,7 +127,6 @@ export class UsersService {
     if (isBookInCollection) {
       throw new ConflictException(`Book is already in the user's collection.`);
     }
-
     user.books.push(book);
 
     return await this.userRepo.save(user);

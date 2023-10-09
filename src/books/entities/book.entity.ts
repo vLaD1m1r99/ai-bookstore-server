@@ -27,7 +27,7 @@ export class Book {
   @Column({ unique: true, nullable: false, length: 50 })
   title: string;
 
-  @Column({ length: 250 })
+  @Column({ length: 1000 })
   description: string;
 
   @Column('simple-array', { default: [], array: true })

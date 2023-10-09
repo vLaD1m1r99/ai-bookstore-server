@@ -1,11 +1,14 @@
+import { IsString } from 'class-validator';
 import { BookGenres } from '../entities/book.entity';
 
 export class CreateBookDto {
+  @IsString()
   title: string;
+  @IsString()
   description: string;
-  pdf: string;
   genre?: BookGenres;
+  @IsString()
   author?: string;
-  image?: string;
-  audio?: string;
+  @IsString()
+  userId: string;
 }

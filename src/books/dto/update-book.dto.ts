@@ -7,7 +7,7 @@ export class UpdateBookDto extends PartialType(CreateBookDto) {
   description?: string;
   genre?: BookGenres;
   author?: string;
-  image?: string;
-  pdf?: string;
+  image?: Express.Multer.File;
+  pdf?: Express.Multer.File;
   audio?: string;
 }
